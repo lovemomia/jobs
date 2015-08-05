@@ -42,8 +42,8 @@ public class OrderCleaner {
     private List<Order> getExpiredOrders() {
         final List<Order> orders = new ArrayList<Order>();
         Date expiredTime = new Date(new Date().getTime() - 30 * 60 * 1000);
-        String sql = "SELECT " + joinFields() + " FROM t_order WHERE status=? AND addTime<?";
-        jdbcTemplate.query(sql, new Object[] { Order.Status.NOT_PAYED, expiredTime }, new RowCallbackHandler() {
+        String sql = "SELECT " + joinFields() + " FROM t_order WHERE (status=? OR status=?) AND addTime<?";
+        jdbcTemplate.query(sql, new Object[] { Order.Status.NOT_PAYED, Order.Status.PRE_PAYED, expiredTime }, new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 orders.add(buildOrder(rs));
