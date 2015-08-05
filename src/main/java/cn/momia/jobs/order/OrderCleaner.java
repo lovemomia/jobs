@@ -122,7 +122,7 @@ public class OrderCleaner {
             int count = order.getCount();
             String sql = "UPDATE t_sku SET unlockedStock=unlockedStock+?, lockedStock=lockedStock-? WHERE id=? AND lockedStock>=? AND status=1";
             if (jdbcTemplate.update(sql, new Object[] { count, count, skuId, count }) == 1) {
-                deleteJoined(order.getProductId(), count);
+                deleteJoined(order.getProductId(), order.getJoinedCount());
             }
         } catch (Exception e) {
             LOGGER.error("fail to unlock order: {}", order.getId(), e);

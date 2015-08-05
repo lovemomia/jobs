@@ -104,4 +104,14 @@ public class Order implements Serializable {
 
         return count;
     }
+
+    public int getJoinedCount() {
+        int count = 0;
+        for (OrderPrice price : prices) {
+            count += price.getAdult();
+            count += price.getChild();
+        }
+
+        return count;
+    }
 }
