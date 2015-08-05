@@ -19,6 +19,9 @@ public class OrderCleaner {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderCleaner.class);
     private static final String[] ORDER_FIELDS = { "id", "customerId", "productId", "skuId", "prices" };
 
+    private static final int USER_COUPON_STATUS_NOT_USED = 1;
+    private static final int USER_COUPON_STATUS_LOCKED = 4;
+
     private JdbcTemplate jdbcTemplate;
 
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -132,7 +135,7 @@ public class OrderCleaner {
     private void releaseUserCoupon(long userId, long orderId) {
         try {
             String sql = "UPDATE t_user_coupon SET orderId=0, status=? WHERE userId=? AND orderId=? AND (status=? OR status=?)";
-            jdbcTemplate.update(sql, new Object[] { 1, userId, orderId, 1, 4 });
+            jdbcTemplate.update(sql, new Object[] { USER_COUPON_STATUS_NOT_USED, userId, orderId, USER_COUPON_STATUS_NOT_USED, USER_COUPON_STATUS_LOCKED });
         } catch (Exception e) {
             LOGGER.error("fail to release user coupon of order: {}", orderId, e);
         }
