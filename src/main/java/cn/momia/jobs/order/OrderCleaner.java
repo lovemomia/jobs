@@ -53,6 +53,8 @@ public class OrderCleaner {
             }
         });
 
+        LOGGER.info("get {} expired orders", orders.size());
+
         return orders;
     }
 
@@ -94,6 +96,8 @@ public class OrderCleaner {
         for (Order order : expiredOrders) {
             if (removeOrder(order.getId())) removedOrders.add(order);
         }
+
+        LOGGER.info("{} orders are removed", removedOrders.size());
 
         return removedOrders;
     }
