@@ -3,10 +3,6 @@
 <web-app>
     <display-name>Momia Jobs Web</display-name>
 
-    <session-config>
-        <session-timeout>30</session-timeout>
-    </session-config>
-
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath*:beans/application-context*.xml</param-value>
@@ -15,4 +11,8 @@
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
 </web-app>
