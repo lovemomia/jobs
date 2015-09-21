@@ -122,13 +122,13 @@ public class OrderCleaner {
 
     private void unlockOrder(Order order) {
         try {
-            unSoldOut(order.getProductId());
-            releaseUserCoupon(order.getCustomerId(), order.getId());
-
             long skuId = order.getSkuId();
             int count = order.getCount();
             String sql = "UPDATE t_sku SET unlockedStock=unlockedStock+?, lockedStock=lockedStock-? WHERE id=? AND lockedStock>=? AND status=1";
             if (jdbcTemplate.update(sql, new Object[] { count, count, skuId, count }) == 1) {
+                unSoldOut(order.getProductId());
+                releaseUserCoupon(order.getCustomerId(), order.getId());
+
                 deleteJoined(order.getProductId(), order.getJoinedCount());
             }
         } catch (Exception e) {
