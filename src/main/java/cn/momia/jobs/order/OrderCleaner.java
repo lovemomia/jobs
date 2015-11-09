@@ -1,32 +1,14 @@
 package cn.momia.jobs.order;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang3.StringUtils;
+import cn.momia.common.service.DbAccessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class OrderCleaner {
+public class OrderCleaner extends DbAccessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderCleaner.class);
-    private static final String[] ORDER_FIELDS = { "id", "customerId", "productId", "skuId", "prices" };
-
-    private static final int USER_COUPON_STATUS_NOT_USED = 1;
-    private static final int USER_COUPON_STATUS_LOCKED = 4;
-
-    private JdbcTemplate jdbcTemplate;
-
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public void run() {
         try {
@@ -34,7 +16,7 @@ public class OrderCleaner {
 
             List<Order> expiredOrders = getExpiredOrders();
             List<Order> removedOrders = removeOrders(expiredOrders);
-            unlockOrders(removedOrders);
+            unlockStocks(removedOrders);
 
             LOGGER.info("clean orders finished");
         } catch (Exception e) {
@@ -43,51 +25,12 @@ public class OrderCleaner {
     }
 
     private List<Order> getExpiredOrders() {
-        final List<Order> orders = new ArrayList<Order>();
-        Date expiredTime = new Date(new Date().getTime() - 30 * 60 * 1000);
-        String sql = "SELECT " + joinFields() + " FROM t_order WHERE (status=? OR status=?) AND addTime<?";
-        jdbcTemplate.query(sql, new Object[] { Order.Status.NOT_PAYED, Order.Status.PRE_PAYED, expiredTime }, new RowCallbackHandler() {
-            @Override
-            public void processRow(ResultSet rs) throws SQLException {
-                orders.add(buildOrder(rs));
-            }
-        });
+        String sql = "SELECT A.Id, A.UserId, B.Id AS SubjectId, B.Type AS SubjectType, COUNT(A.Id) AS Count FROM SG_SubjectOrder A INNER JOIN SG_Subject B ON A.SubjectId=B.Id INNER JOIN SG_SubjectOrderPackage C ON A.Id=C.OrderId WHERE (A.Status=1 OR A.Status=2) AND DATE_ADD(A.UpdateTime, INTERVAL 10 MINUTE)<NOW() GROUP BY A.Id";
+        List<Order> orders = queryList(sql, null, Order.class);
 
         LOGGER.info("get {} expired orders", orders.size());
 
         return orders;
-    }
-
-    private String joinFields() {
-        return StringUtils.join(ORDER_FIELDS, ",");
-    }
-
-    private Order buildOrder(ResultSet rs) throws SQLException {
-        Order order = new Order();
-
-        order.setId(rs.getLong("id"));
-        order.setCustomerId(rs.getLong("customerId"));
-        order.setProductId(rs.getLong("productId"));
-        order.setSkuId(rs.getLong("skuId"));
-        order.setPrices(parseOrderPrices(order.getId(), rs.getString("prices")));
-
-        return order;
-    }
-
-    private List<OrderPrice> parseOrderPrices(long id, String priceJson) {
-        List<OrderPrice> prices = new ArrayList<OrderPrice>();
-
-        try {
-            JSONArray pricesArray = JSON.parseArray(priceJson);
-            for (int i = 0; i < pricesArray.size(); i++) {
-                JSONObject priceObject = pricesArray.getJSONObject(i);
-                prices.add(new OrderPrice(priceObject));
-            }
-        } catch (Exception e) {
-            LOGGER.error("fail to parse order prices, order id: {}", id);
-        }
-
-        return prices;
     }
 
     private List<Order> removeOrders(List<Order> expiredOrders) {
@@ -102,64 +45,28 @@ public class OrderCleaner {
         return removedOrders;
     }
 
-    public boolean removeOrder(long id) {
+    public boolean removeOrder(long orderId) {
         try {
-            String sql = "UPDATE t_order SET status=0 WHERE id=? AND (status=? OR status=?)";
-            int updateCount = jdbcTemplate.update(sql, new Object[] { id, Order.Status.NOT_PAYED, Order.Status.PRE_PAYED });
-
-            return updateCount == 1;
+            String sql = "UPDATE SG_SubjectOrder SET Status=0 WHERE Id=? AND (Status=1 OR status=2)";
+            return update(sql, new Object[] { orderId });
         } catch (Exception e) {
-            LOGGER.error("fail to remove order: {}", id, e);
+            LOGGER.error("fail to remove order: {}", orderId, e);
             return false;
         }
     }
 
-    private void unlockOrders(List<Order> removedOrders) {
+    private void unlockStocks(List<Order> removedOrders) {
         for (Order order : removedOrders) {
-            unlockOrder(order);
+            if (order.getSubjectType() == 2) unlockStock(order);
         }
     }
 
-    private void unlockOrder(Order order) {
+    private void unlockStock(Order order) {
         try {
-            long skuId = order.getSkuId();
-            int count = order.getCount();
-            String sql = "UPDATE t_sku SET unlockedStock=unlockedStock+?, lockedStock=lockedStock-? WHERE id=? AND lockedStock>=? AND status=1";
-            if (jdbcTemplate.update(sql, new Object[] { count, count, skuId, count }) == 1) {
-                unSoldOut(order.getProductId());
-                releaseUserCoupon(order.getCustomerId(), order.getId());
-
-                deleteJoined(order.getProductId(), order.getJoinedCount());
-            }
+            String sql = "UPDATE SG_Subject SET Stock=Stock+? WHERE Id=? AND Status=1";
+            update(sql, new Object[] { order.getCount(), order.getSubjectId() });
         } catch (Exception e) {
-            LOGGER.error("fail to unlock order: {}", order.getId(), e);
-        }
-    }
-
-    private void releaseUserCoupon(long userId, long orderId) {
-        try {
-            String sql = "UPDATE t_user_coupon SET orderId=0, status=? WHERE userId=? AND orderId=? AND (status=? OR status=?)";
-            jdbcTemplate.update(sql, new Object[] { USER_COUPON_STATUS_NOT_USED, userId, orderId, USER_COUPON_STATUS_NOT_USED, USER_COUPON_STATUS_LOCKED });
-        } catch (Exception e) {
-            LOGGER.error("fail to release user coupon of order: {}", orderId, e);
-        }
-    }
-
-    private void unSoldOut(long productId) {
-        try {
-            String sql = "UPDATE t_product SET soldOut=0 WHERE id=? AND soldOut=1 AND status=1";
-            jdbcTemplate.update(sql, new Object[] { productId });
-        } catch (Exception e) {
-            LOGGER.error("fail to set sold out status of product: {}", productId, e);
-        }
-    }
-
-    private void deleteJoined(long productId, int count) {
-        try {
-            String sql = "UPDATE t_product SET joined=joined-? WHERE id=? AND joined>=? AND status=1";
-            jdbcTemplate.update(sql, new Object[] { count, productId, count });
-        } catch (Exception e) {
-            LOGGER.error("fail to decrease joined of product: {}", productId, e);
+            LOGGER.error("fail to unlock stock for order: {}", order.getId(), e);
         }
     }
 }
