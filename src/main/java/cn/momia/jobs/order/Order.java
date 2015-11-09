@@ -1,25 +1,11 @@
 package cn.momia.jobs.order;
 
-import java.io.Serializable;
-import java.util.List;
-
-public class Order implements Serializable {
-    public static class Status {
-        public static final int ALL = -1;
-        public static final int DELETED = 0;
-        public static final int NOT_PAYED = 1; // 已下单未付款
-        public static final int PRE_PAYED = 2; // 准备付款
-        public static final int PAYED = 3;     // 已付款
-        public static final int FINISHED = 4;  // 已完成
-        public static final int TO_REFUND = 5; // 申请退款
-        public static final int REFUNDED = 6;  // 已退款
-    }
-
+public class Order {
     private long id;
-    private long customerId;
-    private long productId;
-    private long skuId;
-    private List<OrderPrice> prices;
+    private long userId;
+    private long subjectId;
+    private int subjectType;
+    private long count;
 
     public long getId() {
         return id;
@@ -29,54 +15,35 @@ public class Order implements Serializable {
         this.id = id;
     }
 
-    public long getCustomerId() {
-        return customerId;
+    public long getUserId() {
+        return userId;
     }
 
-    public void setCustomerId(long customerId) {
-        this.customerId = customerId;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
-    public long getProductId() {
-        return productId;
+    public long getSubjectId() {
+        return subjectId;
     }
 
-    public void setProductId(long productId) {
-        this.productId = productId;
+    public void setSubjectId(long subjectId) {
+        this.subjectId = subjectId;
     }
 
-    public long getSkuId() {
-        return skuId;
+    public int getSubjectType() {
+        return subjectType;
     }
 
-    public void setSkuId(long skuId) {
-        this.skuId = skuId;
+    public void setSubjectType(int subjectType) {
+        this.subjectType = subjectType;
     }
 
-    public List<OrderPrice> getPrices() {
-        return prices;
-    }
-
-    public void setPrices(List<OrderPrice> prices) {
-        this.prices = prices;
-    }
-
-    public int getCount() {
-        int count = 0;
-        for (OrderPrice price : prices) {
-            count += price.getCount();
-        }
-
+    public long getCount() {
         return count;
     }
 
-    public int getJoinedCount() {
-        int count = 0;
-        for (OrderPrice price : prices) {
-            count += price.getAdult();
-            count += price.getChild();
-        }
-
-        return count;
+    public void setCount(long count) {
+        this.count = count;
     }
 }
