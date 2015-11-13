@@ -1,13 +1,13 @@
 package cn.momia.jobs.order;
 
-import cn.momia.common.service.DbAccessService;
+import cn.momia.common.service.AbstractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrderCleaner extends DbAccessService {
+public class OrderCleaner extends AbstractService {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderCleaner.class);
 
     public void run() {
