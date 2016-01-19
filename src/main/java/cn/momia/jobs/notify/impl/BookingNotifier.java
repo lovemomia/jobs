@@ -1,9 +1,8 @@
 package cn.momia.jobs.notify.impl;
 
-import cn.momia.common.service.AbstractService;
 import cn.momia.jobs.notify.Notifier;
 
-public class BookingNotifier extends AbstractService implements Notifier {
+public class BookingNotifier implements Notifier {
     @Override
     public void notifyUser() {
 

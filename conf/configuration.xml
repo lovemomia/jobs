@@ -11,4 +11,8 @@
             <Password>SogoKids</Password>
         </SogoKids>
     </Database>
+
+    <Service>
+        <Course>http://localhost:7070</Course>
+    </Service>
 </Configuration>

@@ -4,6 +4,8 @@
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
         <property name="driverClass" value="com.mysql.jdbc.Driver" />
         <property name="jdbcUrl" value="${Database.SogoKids.JdbcUrl}" />
@@ -42,7 +44,7 @@
     <bean id="10amNotifyManager" class="cn.momia.jobs.notify.NotifyManager" init-method="init">
         <property name="notifiers">
             <set>
-                <bean class="cn.momia.jobs.notify.impl.BookingNotifier" parent="abstractService" />
+                <bean class="cn.momia.jobs.notify.impl.BookingNotifier" />
             </set>
         </property>
     </bean>
@@ -62,10 +64,10 @@
     <bean id="7pmNotifyManager" class="cn.momia.jobs.notify.NotifyManager" init-method="init">
         <property name="notifiers">
             <set>
-                <bean class="cn.momia.jobs.notify.impl.NewCourseNotifier" parent="abstractService" />
-                <bean class="cn.momia.jobs.notify.impl.CourseFinishNotifier" parent="abstractService" />
-                <bean class="cn.momia.jobs.notify.impl.PackageExpiredNotifier" parent="abstractService" />
-                <bean class="cn.momia.jobs.notify.impl.CouponExpiredNotifier" parent="abstractService" />
+                <bean class="cn.momia.jobs.notify.impl.HeraldNotifier" />
+                <bean class="cn.momia.jobs.notify.impl.CourseFinishNotifier" />
+                <bean class="cn.momia.jobs.notify.impl.PackageExpireNotifier" />
+                <bean class="cn.momia.jobs.notify.impl.CouponExpireNotifier" />
             </set>
         </property>
     </bean>
