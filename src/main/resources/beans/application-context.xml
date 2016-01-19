@@ -21,9 +21,11 @@
         <property name="dataSource" ref="dataSource" />
     </bean>
 
-    <bean id="orderCleaner" class="cn.momia.jobs.order.OrderCleaner">
+    <bean id="abstractService" class="cn.momia.common.service.AbstractService" abstract="true">
         <property name="jdbcTemplate" ref="jdbcTemplate" />
     </bean>
+
+    <bean id="orderCleaner" class="cn.momia.jobs.order.OrderCleaner" parent="abstractService" />
 
     <bean id="orderCleanJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="targetObject" ref="orderCleaner" />
@@ -38,7 +40,11 @@
     </bean>
 
     <bean id="10amNotifyManager" class="cn.momia.jobs.notify.NotifyManager" init-method="init">
-
+        <property name="notifiers">
+            <set>
+                <bean class="cn.momia.jobs.notify.impl.BookingNotifier" parent="abstractService" />
+            </set>
+        </property>
     </bean>
 
     <bean id="10amJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
@@ -53,7 +59,14 @@
     </bean>
 
     <bean id="7pmNotifyManager" class="cn.momia.jobs.notify.NotifyManager" init-method="init">
-
+        <property name="notifiers">
+            <set>
+                <bean class="cn.momia.jobs.notify.impl.NewCourseNotifier" parent="abstractService" />
+                <bean class="cn.momia.jobs.notify.impl.CourseFinishNotifier" parent="abstractService" />
+                <bean class="cn.momia.jobs.notify.impl.PackageExpiredNotifier" parent="abstractService" />
+                <bean class="cn.momia.jobs.notify.impl.CouponExpiredNotifier" parent="abstractService" />
+            </set>
+        </property>
     </bean>
 
     <bean id="7pmJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
