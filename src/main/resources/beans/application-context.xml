@@ -55,6 +55,7 @@
 
     <bean id="10amTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="10amJob" />
+        <property name="startDelay" value="10000" />
         <property name="cronExpression" value="0 0 10 ? * *" />
     </bean>
 
@@ -77,6 +78,7 @@
 
     <bean id="7pmTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="7pmJob" />
+        <property name="startDelay" value="10000" />
         <property name="cronExpression" value="0 0 19 ? * *" />
     </bean>
 
