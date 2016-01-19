@@ -37,10 +37,42 @@
         <property name="repeatInterval" value="300000" />
     </bean>
 
+    <bean id="10amNotifyManager" class="cn.momia.jobs.notify.NotifyManager" init-method="init">
+
+    </bean>
+
+    <bean id="10amJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="10amNotifyManager" />
+        <property name="targetMethod" value="produce" />
+        <property name="concurrent" value="false" />
+    </bean>
+
+    <bean id="10amTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="10amJob" />
+        <property name="cronExpression" value="0 0 10 ? * *" />
+    </bean>
+
+    <bean id="7pmNotifyManager" class="cn.momia.jobs.notify.NotifyManager" init-method="init">
+
+    </bean>
+
+    <bean id="7pmJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="7pmNotifyManager" />
+        <property name="targetMethod" value="produce" />
+        <property name="concurrent" value="false" />
+    </bean>
+
+    <bean id="7pmTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="7pmJob" />
+        <property name="cronExpression" value="0 0 19 ? * *" />
+    </bean>
+
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="orderCleanTrigger" />
+                <ref bean="10amTrigger" />
+                <ref bean="7pmTrigger" />
             </list>
         </property>
     </bean>
