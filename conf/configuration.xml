@@ -14,5 +14,11 @@
 
     <Service>
         <Course>http://localhost:7070</Course>
+        <IM>http://localhost:7070</IM>
+        <User>http://localhost:7070</User>
     </Service>
+
+    <AppConf>
+        <Name>duoladebug</Name>
+    </AppConf>
 </Configuration>

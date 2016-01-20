@@ -58,14 +58,16 @@ public class NotifyManager {
                 signal.wait();
             }
 
-            final Notifier notifier = tasksQueue.poll();
-            if (notifier == null) return;
-            executorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    notifier.notifyUser();
-                }
-            });
+            while (!tasksQueue.isEmpty()) {
+                final Notifier notifier = tasksQueue.poll();
+                if (notifier == null) continue;
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifier.notifyUser();
+                    }
+                });
+            }
         }
     }
 }
