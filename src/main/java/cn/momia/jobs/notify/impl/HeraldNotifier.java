@@ -8,6 +8,7 @@ import cn.momia.jobs.notify.Notifier;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,6 @@ public class HeraldNotifier implements Notifier {
         if (courses.isEmpty()) return;
 
         List<Long> userIds = orderServiceApi.queryBookableUserIds();
-        imServiceApi.pushBatch(userIds, "本周精彩课程有：" + StringUtils.join(courses, ",") + "，还没有选课的亲快来\n>> 点我 << 去看看吧~", "http://" + Configuration.getString("Wap.Domain") + "/subject/list");
+        imServiceApi.pushBatch(userIds, "本周精彩课程有：" + StringUtils.join(courses, ",") + "，还没有选课的亲快来\n>> 点我 << 去看看吧~", Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode("http://" + Configuration.getString("Wap.Domain") + "/subject/list"));
     }
 }

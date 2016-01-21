@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +52,7 @@ public class CouponExpireNotifier implements Notifier {
                 String message = userCoupons.size() > 1 ?
                         String.format("您有%d枚红包就要过期啦，\n赶紧 >>点我<< 去下单吧~", userCoupons.size()) :
                         String.format("您有1枚%.2f元的红包就要过期啦，\n赶紧 >>点我<< 去下单吧~", userCoupons.get(0).getDiscount());
-                imServiceApi.push(entry.getKey(), message, "http://" + Configuration.getString("Wap.Domain") + "/subject/list");
+                imServiceApi.push(entry.getKey(), message, Configuration.getString("AppConf.Name") + "://web?url=" + URLEncoder.encode("http://" + Configuration.getString("Wap.Domain") + "/subject/list"));
             }
 
         } finally {
