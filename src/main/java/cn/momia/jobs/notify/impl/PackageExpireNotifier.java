@@ -24,7 +24,7 @@ public class PackageExpireNotifier implements Notifier {
         List<Long> userIds = orderServiceApi.queryUserIdsOfPackagesToExpired(days);
         if (userIds.isEmpty()) return;
 
-        imServiceApi.pushBatch(userIds, String.format("您有课程(包)还有%d天就要过期了，抓紧来选课吧~ >> 点我 << 去选课", days), Configuration.getString("AppConf.Name") + "://bookedcourselist");
+        imServiceApi.pushBatch(userIds, String.format("您有课程(包)还有%d天就要过期了，抓紧来选课吧~\n>> 点我 << 去选课", days), Configuration.getString("AppConf.Name") + "://bookedcourselist");
         userServiceApi.notifyBatch(userIds, String.format("您有课程(包)还有%d天就要过期了，抓紧来选课吧~ http://" + Configuration.getString("Wap.Domain") + "/user/bookable", days));
     }
 }

@@ -15,6 +15,6 @@ public class CourseFinishNotifier implements Notifier {
     @Override
     public void notifyUser() {
         List<Long> userIds = courseServiceApi.queryUserIdsOfTodaysCourse();
-        imServiceApi.pushBatch(userIds, "美好的一天结束啦，小朋友在课堂上都表现得棒棒哒，粑粑和麻麻别忘记给我们的课程写评价哦~ >> 点我 << 去写评价", Configuration.getString("AppConf.Name") + "://bookedcourselist");
+        imServiceApi.pushBatch(userIds, "美好的一天结束啦，小朋友在课堂上都表现得棒棒哒，粑粑和麻麻别忘记给我们的课程写评价哦~\n>> 点我 << 去写评价", Configuration.getString("AppConf.Name") + "://bookedcourselist");
     }
 }

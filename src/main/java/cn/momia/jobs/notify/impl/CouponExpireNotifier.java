@@ -49,8 +49,8 @@ public class CouponExpireNotifier implements Notifier {
             for (Map.Entry<Long, List<UserCoupon>> entry : userCouponsMap.entrySet()) {
                 List<UserCoupon> userCoupons = entry.getValue();
                 String message = userCoupons.size() > 1 ?
-                        String.format("您有%d枚红包就要过期啦，赶紧 >>点我<< 去下单吧~", userCoupons.size()) :
-                        String.format("您有1枚%.2f元的红包就要过期啦，赶紧 >>点我<< 去下单吧~", userCoupons.get(0).getDiscount());
+                        String.format("您有%d枚红包就要过期啦，\n赶紧 >>点我<< 去下单吧~", userCoupons.size()) :
+                        String.format("您有1枚%.2f元的红包就要过期啦，\n赶紧 >>点我<< 去下单吧~", userCoupons.get(0).getDiscount());
                 imServiceApi.push(entry.getKey(), message, "http://" + Configuration.getString("Wap.Domain") + "/subject/list");
             }
 

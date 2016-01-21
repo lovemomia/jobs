@@ -27,6 +27,6 @@ public class HeraldNotifier implements Notifier {
         if (courses.isEmpty()) return;
 
         List<Long> userIds = orderServiceApi.queryBookableUserIds();
-        imServiceApi.pushBatch(userIds, "本周精彩课程有：" + StringUtils.join(courses, ",") + "，还没有选课的亲快来 >> 点我 << 去看看吧~", "http://" + Configuration.getString("Wap.Domain") + "/subject/list");
+        imServiceApi.pushBatch(userIds, "本周精彩课程有：" + StringUtils.join(courses, ",") + "，还没有选课的亲快来\n>> 点我 << 去看看吧~", "http://" + Configuration.getString("Wap.Domain") + "/subject/list");
     }
 }
