@@ -21,4 +21,8 @@
     <AppConf>
         <Name>duoladebug</Name>
     </AppConf>
+
+    <Wap>
+        <Domain>m.momia.cn</Domain>
+    </Wap>
 </Configuration>
