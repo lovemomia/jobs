@@ -8,6 +8,8 @@ import cn.momia.jobs.notify.Notifier;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class HeraldNotifier implements Notifier {
@@ -17,6 +19,10 @@ public class HeraldNotifier implements Notifier {
 
     @Override
     public void notifyUser() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) return;
+
         List<String> courses = courseServiceApi.queryHotNewCourses();
         if (courses.isEmpty()) return;
 
