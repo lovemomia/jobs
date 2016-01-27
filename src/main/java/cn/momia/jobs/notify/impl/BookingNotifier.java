@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class BookingNotifier implements Notifier {
-    @Autowired CourseServiceApi courseServiceApi;
-    @Autowired ImServiceApi imServiceApi;
-    @Autowired UserServiceApi userServiceApi;
+    @Autowired private CourseServiceApi courseServiceApi;
+    @Autowired private ImServiceApi imServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @Override
     public void notifyUser() {

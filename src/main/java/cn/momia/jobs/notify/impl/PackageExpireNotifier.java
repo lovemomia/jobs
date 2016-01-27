@@ -10,9 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 public class PackageExpireNotifier implements Notifier {
-    @Autowired OrderServiceApi orderServiceApi;
-    @Autowired ImServiceApi imServiceApi;
-    @Autowired UserServiceApi userServiceApi;
+    @Autowired private OrderServiceApi orderServiceApi;
+    @Autowired private ImServiceApi imServiceApi;
+    @Autowired private UserServiceApi userServiceApi;
 
     @Override
     public void notifyUser() {
