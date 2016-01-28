@@ -25,7 +25,7 @@ public class OrderCleaner extends AbstractService {
     }
 
     private List<Order> getExpiredOrders() {
-        String sql = "SELECT A.Id, A.UserId, B.Id AS SubjectId, B.Type AS SubjectType, COUNT(A.Id) AS Count FROM SG_SubjectOrder A INNER JOIN SG_Subject B ON A.SubjectId=B.Id INNER JOIN SG_SubjectOrderPackage C ON A.Id=C.OrderId WHERE (A.Status=1 OR A.Status=2) AND DATE_ADD(A.UpdateTime, INTERVAL 10 MINUTE)<NOW() GROUP BY A.Id";
+        String sql = "SELECT A.Id, A.UserId, B.Id AS SubjectId, B.Type AS SubjectType, COUNT(A.Id) AS Count FROM SG_SubjectOrder A INNER JOIN SG_Subject B ON A.SubjectId=B.Id WHERE (A.Status=1 OR A.Status=2) AND DATE_ADD(A.UpdateTime, INTERVAL 10 MINUTE)<NOW() GROUP BY A.Id";
         List<Order> orders = queryObjectList(sql, null, Order.class);
 
         LOGGER.info("get {} expired orders", orders.size());
