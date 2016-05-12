@@ -3,6 +3,8 @@ package cn.momia.jobs.order;
 import cn.momia.common.service.AbstractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,8 @@ public class OrderCleaner extends AbstractService {
             List<Order> expiredOrders = getExpiredOrders();
             List<Order> removedOrders = removeOrders(expiredOrders);
             unlockStocks(removedOrders);
+
+            cleanActivityOrders();
 
             LOGGER.info("clean orders finished");
         } catch (Exception e) {
@@ -68,5 +72,35 @@ public class OrderCleaner extends AbstractService {
         } catch (Exception e) {
             LOGGER.error("fail to unlock stock for order: {}", order.getId(), e);
         }
+    }
+
+
+    private void cleanActivityOrders() {
+        List<Long> expiredEntryIds = getExpiredEntryIds();
+        for (final long entryId : expiredEntryIds) {
+            try {
+                execute(new TransactionCallback() {
+                    @Override
+                    public Object doInTransaction(TransactionStatus status) {
+                        String sql = "UPDATE SG_ActivityEntry SET Status=0 WHERE Id=? AND (Status=1 OR Status=2)";
+                        if (update(sql, new Object[] { entryId })) {
+                            sql = "SELECT ActivityId FROM SG_ActivityEntry WHERE Id=?";
+                            int activityId = queryInt(sql, new Object[] { entryId });
+                            sql = "UPDATE SG_Activity SET UnlockedStock=UnlockedStock+1, LockedStock=LockedStock-1 WHERE Id=? AND UnlockedStock<Stock AND LockedStock>0";
+                            update(sql, new Object[] { activityId });
+                        }
+
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                LOGGER.error("exception, entryId: {}", entryId, e);
+            }
+        }
+    }
+
+    private List<Long> getExpiredEntryIds() {
+        String sql = "SELECT A.Id FROM SG_ActivityEntry A INNER JOIN SG_Activity B ON A.ActivityId=B.Id WHERE A.Status>0 AND A.Status<3 AND DATE_ADD(A.UpdateTime, INTERVAL 10 MINUTE)<NOW() AND B.Stock>0";
+        return queryLongList(sql);
     }
 }
